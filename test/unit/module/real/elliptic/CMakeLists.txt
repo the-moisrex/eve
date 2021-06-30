@@ -27,6 +27,7 @@ make_unit("unit.real.elliptic"  ellint_rc.cpp                 )
 make_unit("unit.real.elliptic"  ellint_rd.cpp                 )
 make_unit("unit.real.elliptic"  ellint_rf.cpp                 )
 make_unit("unit.real.elliptic"  ellint_rg.cpp                 )
+make_unit("unit.real.elliptic"  heuman_lambda.cpp             )
 
 ##==================================================================================================
 ## Elementwise function unit tests
@@ -34,5 +35,4 @@ make_unit("unit.real.elliptic"  ellint_rg.cpp                 )
 
 #make_all_units(ROOT unit.real.elliptic NAME am                   ARCH scalar simd TYPES ${real_types}    )
 # make_all_units(ROOT unit.real.elliptic NAME ellint_3             ARCH scalar simd TYPES ${real_types}    )
-# make_all_units(ROOT unit.real.elliptic NAME heuman_lambda        ARCH scalar simd TYPES ${real_types}    )
 # make_all_units(ROOT unit.real.elliptic NAME jacobi_real.elliptic      ARCH scalar simd TYPES ${real_types}    )

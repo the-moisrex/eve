@@ -26,7 +26,7 @@
 namespace eve::detail
 {
   template<floating_real_value T, floating_real_value U>
-  EVE_FORCEINLINE T heuman_lambda_(EVE_SUPPORTS(cpu_)
+  EVE_FORCEINLINE auto heuman_lambda_(EVE_SUPPORTS(cpu_)
                               , T phi
                               , U k) noexcept
   requires compatible_values<T, U>
@@ -38,35 +38,30 @@ namespace eve::detail
   EVE_FORCEINLINE T heuman_lambda_(EVE_SUPPORTS(cpu_)
                                 , T phi
                                 , T k) noexcept
+  requires has_native_abi_v<T>
   {
-    if constexpr(has_native_abi_v<T>)
+    auto test = eve::abs(phi) <= pio_2(as(k));
+    auto k2 = sqr(k);
+    auto kp = oneminus(k2);
+    T r1(zero(as(k))), r2(zero(as(k)));
+    if (eve::any(test))
     {
-      auto test = eve::abs(phi) <= pio_2(as(k));
-      auto k2 = sqr(k);
-      auto kp = oneminus(k2);
-      T r1(zero(as(k))), r2(zero(as(k)));
-      if (eve::any(test))
-      {
-        auto [sinp, cosp] = sincos(phi);
-        auto s2 = sqr(sinp);
-        auto delta = sqrt(oneminus(kp*s2));
-        r1 = kp * sinp * cosp / (delta * pio_2(as(k)));
-        auto invsqrdelta = rec(sqr(delta));
-        auto z1 =  ellint_rf(T(0), kp, T(1));
-        auto z2 =  ellint_rj(zero(as(k)), kp, one(as(k)), oneminus(k2*invsqrdelta))*invsqrdelta/3;
-        r1 *= fma(k2, z2, z1);
-      }
-      if (eve::any(!test))
-      {
-        auto rkp = sqrt(kp);
-        auto  ratio = ellint_1(phi, rkp) / ellint_1(rkp);
-        r2 = if_else(rkp == one(as(rkp)), inf(as(rkp)), ratio + ellint_1(k) * jacobi_zeta(phi, rkp) / pio_2(as(k)));
-      }
-      auto r = if_else(k2 > one(as(k2)), allbits, if_else(test, r1, r2));
-      return if_else(phi == pio_2(as(phi)), one, r); //this is a guess about what user wants as pio_2 is not exact
-
+      auto [sinp, cosp] = sincos(phi);
+      auto s2 = sqr(sinp);
+      auto delta = sqrt(oneminus(kp*s2));
+      r1 = kp * sinp * cosp / (delta * pio_2(as(k)));
+      auto invsqrdelta = rec(sqr(delta));
+      auto z1 =  ellint_rf(T(0), kp, T(1));
+      auto z2 =  ellint_rj(zero(as(k)), kp, one(as(k)), oneminus(k2*invsqrdelta))*invsqrdelta/3;
+      r1 *= fma(k2, z2, z1);
     }
-    else
-      return apply_over(heuman_lambda, phi, k);
+    if (eve::any(!test))
+    {
+      auto rkp = sqrt(kp);
+      auto  ratio = ellint_1(phi, rkp) / ellint_1(rkp);
+      r2 = if_else(rkp == one(as(rkp)), inf(as(rkp)), ratio + ellint_1(k) * jacobi_zeta(phi, rkp) / pio_2(as(k)));
+    }
+    auto r = if_else(k2 > one(as(k2)), allbits, if_else(test, r1, r2));
+    return if_else(phi == pio_2(as(phi)), one, r); //this is a guess about what user wants as pio_2 is not exact
   }
 }

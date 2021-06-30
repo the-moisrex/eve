@@ -24,7 +24,7 @@
 namespace eve::detail
 {
   template<floating_real_value T, floating_real_value U>
-  EVE_FORCEINLINE T jacobi_zeta_(EVE_SUPPORTS(cpu_)
+  EVE_FORCEINLINE auto jacobi_zeta_(EVE_SUPPORTS(cpu_)
                               , T phi
                               , U k) noexcept
   requires compatible_values<T, U>
@@ -36,23 +36,19 @@ namespace eve::detail
   EVE_FORCEINLINE T jacobi_zeta_(EVE_SUPPORTS(cpu_)
                                 , T phi
                                 , T k) noexcept
+  requires has_native_abi_v<T>
   {
-    if constexpr(has_native_abi_v<T>)
-    {
-      auto aphi = eve::abs(phi);
-      auto [sinp, cosp] = sincos(aphi);
-      auto s2 = sqr(sinp);
-      auto k2 = sqr(k);
-      auto kp = oneminus(k2);
-      auto k2s2c = oneminus(k2*s2);
-      auto e_rj = ellint_rj(zero(as(phi)), kp, one(as(phi)), k2s2c);
-      auto e_1 = ellint_1(k);
-      auto r = if_else(k2 == one(as(k)),  eve::signnz(cosp)*sinp
-                      , k2*sinp*cosp*sqrt(k2s2c)*e_rj/(3*e_1));
-      r =  if_else(aphi == pio_2(as(phi)), zero, r); //this is a guess of what the user wants pio_2 being not exact
-      return negate(r, phi); ;
-    }
-    else
-      return apply_over(jacobi_zeta, phi, k);
+    auto aphi = eve::abs(phi);
+    auto [sinp, cosp] = sincos(aphi);
+    auto s2 = sqr(sinp);
+    auto k2 = sqr(k);
+    auto kp = oneminus(k2);
+    auto k2s2c = oneminus(k2*s2);
+    auto e_rj = ellint_rj(zero(as(phi)), kp, one(as(phi)), k2s2c);
+    auto e_1 = ellint_1(k);
+    auto r = if_else(k2 == one(as(k)),  eve::signnz(cosp)*sinp
+                    , k2*sinp*cosp*sqrt(k2s2c)*e_rj/(3*e_1));
+    r =  if_else(aphi == pio_2(as(phi)), zero, r); //this is a guess of what the user wants pio_2 being not exact
+    return negate(r, phi); ;
   }
 }
