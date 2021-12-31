@@ -21,7 +21,7 @@ namespace adapt
 
   polar_coords to_polar(float x, float y)
   {
-    auto rho    = std::sqrt(x * x + y * y);
+    auto rho    = std::hypot(x, y);
     auto theta  = std::atan2(y, x);
     return { rho, theta };
   }
@@ -30,6 +30,8 @@ namespace adapt
 
 //! [simd-udt-adapt]
 // Opt-in for eve::product_type
+#include <eve/product_type.hpp>
+
 template<>
 struct eve::is_product_type<adapt::polar_coords> : std::true_type
 {};
@@ -62,14 +64,14 @@ struct std::tuple_element<I,adapt::polar_coords>
 //! [simd-udt-adapt]
 
 //! [simd-udt-to_polar]
-#include <eve/function/sqrt.hpp>
+#include <eve/function/hypot.hpp>
 #include <eve/function/atan2.hpp>
 
 namespace adapt
 {
   eve::wide<polar_coords> to_polar(eve::wide<float> x, eve::wide<float> y)
   {
-    auto rho    = eve::sqrt(x * x + y * y);
+    auto rho    = eve::hypot(x, y);
     auto theta  = eve::atan2(y, x);
     return eve::wide<polar_coords>{ rho, theta };
   }
@@ -103,12 +105,14 @@ namespace udt
 #include <eve/algo/container/soa_vector.hpp>
 #include <eve/algo/transform.hpp>
 #include <eve/views/zip.hpp>
+#include <eve/function/hypot.hpp>
+#include <eve/function/atan2.hpp>
 
 namespace udt
 {
   auto to_polar(eve::wide<float> x, eve::wide<float> y)
   {
-    auto rho    = eve::sqrt(x * x + y * y);
+    auto rho    = eve::hypot(x, y);
     auto theta  = eve::atan2(y, x);
     return eve::wide<kumi::tuple<float,float>>{ rho, theta };
   }
